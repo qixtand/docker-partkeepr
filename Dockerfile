@@ -1,12 +1,11 @@
-FROM php:7.1-apache
-LABEL maintainer="Markus Hubig <mhubig@gmail.com>"
+FROM qixtand/php:7.1-buster-apache
 LABEL version="1.4.0-20"
 
 ENV PARTKEEPR_VERSION 1.4.0
 
 RUN set -ex \
     && apt-get update && apt-get install -y \
-        bsdtar \
+        tar \
         libcurl4-openssl-dev \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
@@ -17,7 +16,7 @@ RUN set -ex \
         cron \
     --no-install-recommends && rm -r /var/lib/apt/lists/* \
     \
-    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ \
+    && docker-php-ext-configure ldap --with-libdir=lib/arm-linux-gnueabihf/ \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install -j$(nproc) curl ldap bcmath gd dom intl opcache pdo pdo_mysql \
     \
@@ -26,7 +25,7 @@ RUN set -ex \
     \
     && cd /var/www/html \
     && curl -sL https://downloads.partkeepr.org/partkeepr-${PARTKEEPR_VERSION}.tbz2 \
-        |bsdtar --strip-components=1 -xvf- \
+        | tar --strip-components=1 -xvj \
     && chown -R www-data:www-data /var/www/html \
     \
     && a2enmod rewrite
